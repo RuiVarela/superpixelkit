@@ -1,0 +1,23 @@
+{
+  "name": "superpixelkit",
+  "version": "1.0.0",
+  "description": "Super Kano Pixel Kit",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RuiVarela/superpixelkit.git"
+  },
+  "keywords": [
+    "Kano",
+    "pixelkit"
+  ],
+  "author": "Rui varela",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RuiVarela/superpixelkit/issues"
+  },
+  "homepage": "https://github.com/RuiVarela/superpixelkit#readme"
+}
