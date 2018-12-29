@@ -7,6 +7,7 @@ const CreateInterface = require('readline').createInterface;
 const uuid = require('uuid');
 
 class SuperPixel {
+
     constructor(options) {
         if (!options || (!options.path && !options.ip)) {
             throw new Error('Path or ip address are required');
@@ -221,10 +222,42 @@ class SuperPixel {
         }
     }
 
+    hexToBase64Colors(element) {
+        let frameBuffer = new Buffer(element.length * 2, 0);
+
+        element.forEach((color, index) => {
+            let colorBin = new Buffer(2),
+                rgb888,
+                rgb565;
+
+            if (typeof color === "string" && color.length === 7 && /#[0-9a-f]{6}/i.test(color)) {
+                rgb888 = parseInt(color.substring(1, 7), 16);
+                //                blue                 green                  red
+                rgb565 = (rgb888 & 0xF8) >> 3 | (rgb888 & 0xFC00) >> 5 | (rgb888 & 0xF80000) >> 8;
+
+                colorBin.writeUInt16BE(rgb565, 0);
+            } else {
+                // If the color is invalid, write black
+                colorBin.writeUInt16BE(0x0000, 0);
+            }
+
+            colorBin.copy(frameBuffer, index * 2);
+        });
+        return frameBuffer.toString('base64');
+    }
 
     //
     // commands
     //
+    getDeviceInfo() {
+        return this.rpcRequest('device-info', []);
+    }
+    setName(name) {
+        return this.rpcRequest('set-name', [name]);
+    }
+    getName() {
+        return this.rpcRequest('get-name', []);
+    }
     getBatteryStatus() {
         return this.rpcRequest('battery-status', []);
     }
@@ -234,9 +267,68 @@ class SuperPixel {
     scanWifi() {
         return this.rpcRequest('wifi-scan', []);
     }
+    getLastWifiError() {
+        return this.rpcRequest('wifi-last-error', []);
+    }
     connectToWifi(ssid, password) {
         return this.rpcRequest('wifi-connect', [ssid, password]);
     }
+    playTone(freq, duration) {
+        return this.rpcRequest('play-tone', [{ freq: freq, duration: duration }]);
+    }
+    isPlayingTone() {
+        return this.rpcRequest('is-playing-tone', []);
+    }
+    stopTone() {
+        return this.rpcRequest('stop-tone', []);
+    }
+    getMicThreshold() {
+        return this.rpcRequest('get-mic-threshold', []);
+    }
+    // `level` can be `high`, `low` and `mid` or `custom`. If it's `custom`
+    // it's expected to set a `min` and a `max`.
+    setMicThreshold(level, min, max) {
+        if(level == 'custom') {
+            return this.rpcRequest('set-mic-threshold', [{
+                level: level, min: min, max: max
+            }]);
+        }
+        return this.rpcRequest('set-mic-threshold', [{ level: level }]);
+    }
+
+    // frame must be an array with 128 hexadecimal colors prefixed with a `#`
+    streamFrame(frame) {
+        let encodedFrame = this.hexToBase64Colors(frame);
+        return this.rpcRequest('lightboard:on', [{ map: encodedFrame }]);
+    }
+    // disableOTGControl() {}
+    getAnimationConfig(modeId) {
+        return this.rpcRequest('get-anim-config', [{ modeId: modeId }]);
+    }
+    setAnimationConfig(name, modeId, frameCount, frameRate, coverUrl) {
+        return this.rpcRequest('set-anim-config', [{
+            name: name,
+            modeId: modeId,
+            frameCount: frameCount,
+            frameRate: frameRate,
+            animImgUrl: coverUrl
+        }]);
+    }
+    getMaxFrames() {
+        return this.rpcRequest('get-max-frames', []);
+    }
+    eraseAnimation(modeId) {
+        return this.rpcRequest('animation-erase', [{ modeId: modeId }]);
+    }
+    saveAnimationFrame(modeId, frameNumber, frame) {
+        let encodedFrame = this.hexToBase64Colors(frame);
+        return this.rpcRequest('animation-send-frame', [{
+            modeId: modeId,
+            frameNumber: frameNumber,
+            map: encodedFrame
+        }]);
+    }
+    // TODO: Save animation that writes the frames and save the config.
 
     //
     // handlers
@@ -256,9 +348,6 @@ class SuperPixel {
     onError(message) {
         console.log("onError: " + message);
     }
-
-
-
 }
 
 module.exports = SuperPixel

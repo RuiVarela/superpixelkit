@@ -1,4 +1,4 @@
-const SuperPixel = require('./superpixel.js');
+const SuperPixel = require('./superpixel');
+const SuperPixelApp = require('./superpixelapp');
 
-module.exports = {
-}
+const Blink = require('./apps/blink');
