@@ -4,7 +4,10 @@
   "description": "Super Kano Pixel Kit",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "list-devices": "node index.js list-devices",
+    "device-tail": "node index.js device-tail 192.168.1.90",
+    "device-info": "node index.js device-info /dev/ttyUSB0",
+    "device-wifi": "node index.js device-wifi /dev/ttyUSB0 HomeSweetHome WIFI_PASSWORD"
   },
   "repository": {
     "type": "git",
@@ -19,5 +22,10 @@
   "bugs": {
     "url": "https://github.com/RuiVarela/superpixelkit/issues"
   },
-  "homepage": "https://github.com/RuiVarela/superpixelkit#readme"
+  "homepage": "https://github.com/RuiVarela/superpixelkit#readme",
+  "dependencies": {
+    "serialport": "^6.2.2",
+    "uuid": "^3.3.2",
+    "ws": "^6.0.0"
+  }
 }
