@@ -14,6 +14,7 @@ class SuperPixel {
         }
 
         this.requests = {};
+        this.hander = null;
 
         if (options.path) {
             this.path = options.path;
@@ -27,6 +28,10 @@ class SuperPixel {
         } else if (options.ip) {
             this.ip = options.ip;
         }
+    }
+
+    setHandler(handler) {
+        this.hander = handler;
     }
 
     static listConnectedDevices() {
@@ -123,7 +128,8 @@ class SuperPixel {
    */
     rpcRequest(method, params) {
         let request = this.getRPCRequestObject(method, params);
-        return this.rpcPromise(request);
+        let promise = this.rpcPromise(request);
+        return promise;
     }
 
     /**
@@ -150,15 +156,15 @@ class SuperPixel {
      * @return {Promise}
      */
     rpcPromise(request) {
-        return new Promise((resolve, reject) => {
-            this.requests[request.id] = { resolve, reject };
-
+        let promise = new Promise((resolve, reject) => {
+            this.requests[request.id] = { resolve, reject, request };
             if (this.port) {
                 this.port.write(Buffer.from(JSON.stringify(request) + '\r\n'));
             } else if (this.ws) {
                 this.ws.send(Buffer.from(JSON.stringify(request) + '\r\n'))
             }
         });
+        return promise;
     }
 
     handleData(received) {
@@ -180,7 +186,7 @@ class SuperPixel {
 
                 received = received.substring(0, position);
             }
-            
+
 
             let data = JSON.parse(received);
 
@@ -197,6 +203,8 @@ class SuperPixel {
                     }
 
                     delete this.requests[data.id];
+                } else {
+                    console.log("request not found");
                 }
             }
 
@@ -215,6 +223,7 @@ class SuperPixel {
                         this.onError(data.detail.msg);
                         break;
                     default:
+                        this.onError(data.detail.msg);
                 }
             }
         } catch (e) {
@@ -288,7 +297,7 @@ class SuperPixel {
     // `level` can be `high`, `low` and `mid` or `custom`. If it's `custom`
     // it's expected to set a `min` and a `max`.
     setMicThreshold(level, min, max) {
-        if(level == 'custom') {
+        if (level == 'custom') {
             return this.rpcRequest('set-mic-threshold', [{
                 level: level, min: min, max: max
             }]);
@@ -299,8 +308,14 @@ class SuperPixel {
     // frame must be an array with 128 hexadecimal colors prefixed with a `#`
     streamFrame(frame) {
         let encodedFrame = this.hexToBase64Colors(frame);
-        return this.rpcRequest('lightboard:on', [{ map: encodedFrame }]);
+        let promise = this.rpcRequest('lightboard:on', [{ map: encodedFrame }]);
+        return promise;
     }
+
+    sendFrameBuffer(buffer) {
+        return this.rpcRequest('lightboard:on', [{ map: buffer.toString('base64') }]);
+    }
+
     // disableOTGControl() {}
     getAnimationConfig(modeId) {
         return this.rpcRequest('get-anim-config', [{ modeId: modeId }]);
@@ -328,25 +343,30 @@ class SuperPixel {
             map: encodedFrame
         }]);
     }
-    // TODO: Save animation that writes the frames and save the config.
 
     //
     // handlers
     //
+    onError(message) {
+        console.log("onError: " + message);
+    }
+
     onButtonUp(id) {
-        console.log("onButtonUp: " + id);
+        if (this.hander) {
+            this.hander.onButtonUp(id);
+        }
     }
 
     onButtonDown(id) {
-        console.log("onButtonDown: " + id);
+        if (this.hander) {
+            this.hander.onButtonDown(id);
+        }
     }
 
     onDial(id) {
-        console.log("onDial: " + id);
-    }
-
-    onError(message) {
-        console.log("onError: " + message);
+        if (this.hander) {
+            this.hander.onDial(id);
+        }
     }
 }
 

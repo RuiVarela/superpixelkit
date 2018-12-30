@@ -8,7 +8,7 @@
     "device-wifi": "node index.js device-wifi /dev/ttyUSB0 HomeSweetHome WIFI_PASSWORD",
     "device-info": "node index.js device-info 192.168.1.90",
     "device-name": "node index.js device-name 192.168.1.90 Pixy",
-    "device-name": "node index.js device-app 192.168.1.90 Blink"
+    "device-app": "node index.js device-app 192.168.1.90 Blink"
   },
   "repository": {
     "type": "git",
