@@ -55,7 +55,7 @@ class SuperPixelApp {
 
     step() {
         this._frame++;
-        console.log("Step " + this.name() + " " + this._frame + " " + this.elapsed());
+        //console.log("Step " + this.name() + " " + this._frame + " " + this.elapsed());
     }
 
     static rgbTo888(r, g, b) {
@@ -98,6 +98,84 @@ class SuperPixelApp {
         this._framebuffer.writeUInt16BE(rgb565, offset * 2);
         this._framebuffer_changed = true;
     }
+
+    line(x1, y1, x2, y2, rgb565) {
+        let x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+        dx = x2 - x1;
+        dy = y2 - y1;
+    
+        // Create a positive copy of deltas (makes iterating easier)
+        dx1 = Math.abs(dx);
+        dy1 = Math.abs(dy);
+    
+        // Calculate error intervals for both axis
+        px = 2 * dy1 - dx1;
+        py = 2 * dx1 - dy1;
+    
+        // The line is X-axis dominant
+        if (dy1 <= dx1) {
+    
+            // Line is drawn left to right
+            if (dx >= 0) {
+                x = x1; y = y1; xe = x2;
+            } else { // Line is drawn right to left (swap ends)
+                x = x2; y = y2; xe = x1;
+            }
+    
+            this.setPixel565(x, y, rgb565); // Draw first pixel
+    
+            // Rasterize the line
+            for (i = 0; x < xe; i++) {
+                x = x + 1;
+    
+                // Deal with octants...
+                if (px < 0) {
+                    px = px + 2 * dy1;
+                } else {
+                    if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+                        y = y + 1;
+                    } else {
+                        y = y - 1;
+                    }
+                    px = px + 2 * (dy1 - dx1);
+                }
+    
+                // Draw pixel from line span at currently rasterized position
+                this.setPixel565(x, y, rgb565);
+            }
+    
+        } else { // The line is Y-axis dominant
+    
+            // Line is drawn bottom to top
+            if (dy >= 0) {
+                x = x1; y = y1; ye = y2;
+            } else { // Line is drawn top to bottom
+                x = x2; y = y2; ye = y1;
+            }
+    
+            this.setPixel565(x, y, rgb565);
+    
+            // Rasterize the line
+            for (i = 0; y < ye; i++) {
+                y = y + 1;
+    
+                // Deal with octants...
+                if (py <= 0) {
+                    py = py + 2 * dx1;
+                } else {
+                    if ((dx < 0 && dy<0) || (dx > 0 && dy > 0)) {
+                        x = x + 1;
+                    } else {
+                        x = x - 1;
+                    }
+                    py = py + 2 * (dx1 - dy1);
+                }
+    
+                // Draw pixel from line span at currently rasterized position
+                this.setPixel565(x, y, rgb565);
+            }
+        }
+     }
 
     render() {
         this.step();
