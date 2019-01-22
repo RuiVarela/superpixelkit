@@ -1,9 +1,10 @@
-const SuperPixel = require('./superpixel');
-const SuperPixelApp = require('./superpixelapp');
+require('./superpixel');
+require('./superpixelapp');
 
-const Blink = require('./apps/blink');
-const Lines = require('./apps/lines');
-const Rectangles = require('./apps/rectangles');
-const Circles = require('./apps/circles');
-const Ellipses = require('./apps/ellipses');
-const Fill = require('./apps/fill');
+require('./apps/blink');
+require('./apps/lines');
+require('./apps/rectangles');
+require('./apps/circles');
+require('./apps/ellipses');
+require('./apps/fill');
+require('./apps/text');
