@@ -7,9 +7,11 @@ class Circles extends SuperPixelApp {
 
     step() {
         this.clear(0);
-        let border = SuperPixelApp.rgbTo565(255, 0, 0);
+        let border = SuperPixelApp.rgbTo565(200, 0, 0);
 
-        this.circle(8, 3, 3, border);
+        this.circle(2, 3, 2, border);
+        this.circle(15 - 2, 3, 2, border);
+        this.circle(8, 3, 1, border);
 
         super.step();
     }

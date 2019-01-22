@@ -8,4 +8,3 @@ This is a playground to use develop Pixel Kit Apps using node
 - Kano Pixel Kit communication was based on [murilopolese work](https://github.com/murilopolese/kano-kits/tree/nodejs)
 - Js Bresenham's line algorithm implementation was based on [www.javascriptteacher.com](http://www.javascriptteacher.com/bresenham-line-drawing-algorithm.html)
 - Circle and elipse algorithms were based on [nashvail code](https://github.com/nashvail/CG-DrawingAlgorithms)
-- Flood Fill algorithm was based on [Geeyoam](https://codepen.io/Geeyoam/pen/vLGZzG)

@@ -7,11 +7,11 @@ class Lines extends SuperPixelApp {
 
     step() {
         this.clear(0);
-        let color = SuperPixelApp.rgbTo565(0, 255, 0);
+        let color = SuperPixelApp.rgbTo565(0, 200, 0);
         this.line(0, 0, 15, 7, color);
         this.line(0, 7, 15, 0, color);
 
-        color = SuperPixelApp.rgbTo565(255, 0, 0);
+        color = SuperPixelApp.rgbTo565(0, 0, 200);
         this.line(0, 0, 15, 0, color);
         this.line(15, 0, 15, 7, color);
         this.line(15, 7, 0, 7, color);

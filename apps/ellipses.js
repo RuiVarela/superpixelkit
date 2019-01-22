@@ -9,7 +9,7 @@ class Ellipses extends SuperPixelApp {
         this.clear(0);
         let border = SuperPixelApp.rgbTo565(255, 0, 0);
 
-        this.ellipse(8, 3, 5, 3, border);
+        this.ellipse(8, 3, 4, 3, border);
 
         super.step();
     }

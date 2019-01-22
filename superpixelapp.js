@@ -34,6 +34,9 @@ class SuperPixelApp {
     }
 
     static rgbTo565(r, g, b) {
+        //let rgb888 = SuperPixelApp.rgbTo888(r, g, b);
+        //let rgb565 = (rgb888 & 0xF8) >> 3 | (rgb888 & 0xFC00) >> 5 | (rgb888 & 0xF80000) >> 8;
+
         r /= 256.0 - 1.0;
         g /= 256.0 - 1.0;
         b /= 256.0 - 1.0;
@@ -46,9 +49,7 @@ class SuperPixelApp {
         g = parseInt(g, 10);
         b = parseInt(b, 10);
 
-        let rgb888 = SuperPixelApp.rgbTo888(r, g, b);
-        let rgb565 = (rgb888 & 0xF8) >> 3 | (rgb888 & 0xFC00) >> 5 | (rgb888 & 0xF80000) >> 8;
-        return rgb565;
+        return (b & 0x1F) | (g & 0x3F) << 5 | (r & 0x1F) << 11;
     }
 
     static rgbTo888(r, g, b) {
@@ -100,13 +101,17 @@ class SuperPixelApp {
     }
 
     setPixel565(x, y, rgb565) {
+        if (x < 0 || y < 0 || x >= this._width || y >= this._height) {
+            return;
+        }
+
         let offset = y * this._width + x;
         this._framebuffer.writeUInt16BE(rgb565, offset * 2);
     }
 
     getPixel565(x, y, rgb565) {
         let offset = y * this._width + x;
-        return this._framebuffer.readUInt16BE(rgb565, offset * 2);
+        return this._framebuffer.readUInt16BE(offset * 2);
     }
 
     render() {
@@ -245,7 +250,7 @@ class SuperPixelApp {
         for (let x = x1; x <= x2; ++x) {
             for (let y = y1; y <= y2; ++y) {
 
-                if (x == x1 || x == x1 || y == y0 || y == y1) {
+                if (x == x1 || x == x2 || y == y1 || y == y2) {
                     this.setPixel565(x, y, border565);
                 } else if (fill565) {
                     this.setPixel565(x, y, fill565);
@@ -265,7 +270,7 @@ class SuperPixelApp {
             p = 1 - radius;
 
         // Plot first set of points
-        this.circlePlotPoints(xCenter, yCenter, x, y, border565);
+        this._circlePlotPoints(xCenter, yCenter, x, y, border565);
         while (x <= y) {
             x++;
             if (p < 0) // Mid point is inside therefore y remains same
@@ -274,10 +279,10 @@ class SuperPixelApp {
                 y--;
                 p += 2 * (x - y) + 1;
             }
-            this.circlePlotPoints(xCenter, yCenter, x, y, border565);
+            this._circlePlotPoints(xCenter, yCenter, x, y, border565);
         }
     }
-    circlePlotPoints(xCenter, yCenter, x, y, border565) {
+    _circlePlotPoints(xCenter, yCenter, x, y, border565) {
         this.setPixel565(xCenter + x, yCenter + y, border565);
         this.setPixel565(xCenter + y, yCenter + x, border565);
 
@@ -296,7 +301,7 @@ class SuperPixelApp {
     //
     ellipse(xCenter, yCenter, rx, ry, border565) {
         let x, y, p, dpe, dps, dpse, d2pe, d2ps, d2pse;
-        let rx2 = pow(rx, 2), ry2 = pow(ry, 2);
+        let rx2 = Math.pow(rx, 2), ry2 = Math.pow(ry, 2);
         x = 0;
         y = ry;
         p = ry2 + (rx2 * (1 - 4 * ry) - 2) / 4;
@@ -306,7 +311,7 @@ class SuperPixelApp {
         d2pse = d2pe + 2 * rx2;
 
         // Plot region one
-        this.ellipsePlotPoints(xCenter, yCenter, x, y, border565);
+        this._ellipsePlotPoints(xCenter, yCenter, x, y, border565);
         while (dpse < (2 * rx2) + (3 * ry2)) {
             if (p < 0) { // select E
                 p = p + dpe;
@@ -318,7 +323,7 @@ class SuperPixelApp {
                 y--;
             }
             x++;
-            this.ellipsePlotPoints(xCenter, yCenter, x, y, border565);
+            this._ellipsePlotPoints(xCenter, yCenter, x, y, border565);
         }
 
         // Plot region 2
@@ -339,10 +344,10 @@ class SuperPixelApp {
                 x++;
             }
             y--;
-            this.ellipsePlotPoints(xCenter, yCenter, x, y, border565);
+            this._ellipsePlotPoints(xCenter, yCenter, x, y, border565);
         }
     }
-    ellipsePlotPoints(xCenter, yCenter, x, y, border565) {
+    _ellipsePlotPoints(xCenter, yCenter, x, y, border565) {
         this.setPixel565(xCenter + x, yCenter + y, border565);
         this.setPixel565(xCenter + x, yCenter - y, border565);
         this.setPixel565(xCenter - x, yCenter + y, border565);
@@ -353,58 +358,38 @@ class SuperPixelApp {
     // Flood Fill Drawing
     //
     flood(x, y, rgb565) {
-        const stack = []
-        const base_color = this.getPixel565(x, y);
-        let operator = { x, y }
-
-        // Check if base color and new color are the same
-        if (base_color == rgb565) {
-            return
+        let test_color = this.getPixel565(x, y);
+        if (test_color == rgb565) {
+            return;
         }
 
-        // Add the clicked location to stack
-        stack.push({ x: operator.x, y: operator.y })
+        let stack = [];
+        stack.push({x,y});
 
-        while (stack.length) {
-            operator = stack.pop()
-            let contiguous_down = true // Vertical is assumed to be true
-            let contiguous_up = true // Vertical is assumed to be true
-            let contiguous_left = false
-            let contiguous_right = false
+        while (stack.length > 0) {
+            let current = stack.pop();
 
-            // Move to top most contiguous_down pixel
-            while (contiguous_up && operator.y >= 0) {
-                operator.y--
-                contiguous_up = (this.getPixel565(operator.x, operator.y) == base_color);
+            let pixel = this.getPixel565(current.x, current.y);
+            if (pixel != test_color) {
+                continue;
             }
 
-            // Move downward
-            while (contiguous_down && operator.y < this._height) {
-                this.setPixel565(operator.x, operator.y, rgb565);
+            this.setPixel565(current.x, current.y, rgb565);
 
-                // Check left
-                if (operator.x - 1 >= 0 && (this.getPixel565(operator.x - 1, operator.y) == base_color)) {
-                    if (!contiguous_left) {
-                        contiguous_left = true
-                        stack.push({ x: operator.x - 1, y: operator.y })
-                    }
-                } else {
-                    contiguous_left = false
-                }
+            if (current.y > 1) {
+                stack.push({ x: current.x, y: current.y - 1 });
+            }
 
-    
-                // Check right
-                if (operator.x + 1 < this._width && (this.getPixel565(operator.x + 1, operator.y) == base_color)) {
-                    if (!contiguous_right) {
-                        stack.push({ x: operator.x + 1, y: operator.y })
-                        contiguous_right = true
-                    }
-                } else {
-                    contiguous_right = false
-                }
+            if (current.x < this._width - 1) {
+                stack.push({ x: current.x + 1, y: current.y });
+            }
 
-                operator.y++
-                contiguous_down = (this.getPixel565(operator.x, operator.y) == base_color);
+            if (current.y < this._height - 1) {
+                stack.push({ x: current.x, y: current.y + 1 });
+            }
+
+            if (current.x > 1) {
+                stack.push({ x: current.x - 1, y: current.y });
             }
         }
     }
