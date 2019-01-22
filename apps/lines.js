@@ -2,10 +2,7 @@ const SuperPixelApp = require('../superpixelapp');
 
 class Lines extends SuperPixelApp {
     constructor() {
-        super({
-            name: "Lines",
-            delay: 100
-        });
+        super({ name: "Lines", delay: 100 });
     }
 
     step() {

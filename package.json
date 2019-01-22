@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/RuiVarela/superpixelkit/issues"
   },
-  "homepage": "https://github.com/RuiVarela/superpixelkit#readme",
+  "homepage": "https://github.com/RuiVarela/superpixelkit/blob/master/README.md",
   "dependencies": {
     "serialport": "^6.2.2",
     "uuid": "^3.3.2",

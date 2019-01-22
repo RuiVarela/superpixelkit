@@ -120,12 +120,12 @@ class SuperPixel {
     }
 
     /**
-   * Sends an RPC request to device calling for a `method` passing `params`.
-   *
-   * @param {String} method Which RPC method to call on the board.
-   * @param {Array} params Parameters for the current method.
-   * @return {Promise}
-   */
+     * Sends an RPC request to device calling for a `method` passing `params`.
+     *
+     * @param {String} method Which RPC method to call on the board.
+     * @param {Array} params Parameters for the current method.
+     * @return {Promise}
+     */
     rpcRequest(method, params) {
         let request = this.getRPCRequestObject(method, params);
         let promise = this.rpcPromise(request);

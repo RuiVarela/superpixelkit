@@ -2,10 +2,7 @@ const SuperPixelApp = require('../superpixelapp');
 
 class Blink extends SuperPixelApp {
     constructor() {
-        super({
-            name: "Blink",
-            delay: 1000
-        });
+        super({ name: "Blink", delay: 1000 });
     }
 
     step() {
