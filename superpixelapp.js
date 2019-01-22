@@ -349,7 +349,65 @@ class SuperPixelApp {
         this.setPixel565(xCenter - x, yCenter - y, border565);
     }
 
+    //
+    // Flood Fill Drawing
+    //
+    flood(x, y, rgb565) {
+        const stack = []
+        const base_color = this.getPixel565(x, y);
+        let operator = { x, y }
 
+        // Check if base color and new color are the same
+        if (base_color == rgb565) {
+            return
+        }
+
+        // Add the clicked location to stack
+        stack.push({ x: operator.x, y: operator.y })
+
+        while (stack.length) {
+            operator = stack.pop()
+            let contiguous_down = true // Vertical is assumed to be true
+            let contiguous_up = true // Vertical is assumed to be true
+            let contiguous_left = false
+            let contiguous_right = false
+
+            // Move to top most contiguous_down pixel
+            while (contiguous_up && operator.y >= 0) {
+                operator.y--
+                contiguous_up = (this.getPixel565(operator.x, operator.y) == base_color);
+            }
+
+            // Move downward
+            while (contiguous_down && operator.y < this._height) {
+                this.setPixel565(operator.x, operator.y, rgb565);
+
+                // Check left
+                if (operator.x - 1 >= 0 && (this.getPixel565(operator.x - 1, operator.y) == base_color)) {
+                    if (!contiguous_left) {
+                        contiguous_left = true
+                        stack.push({ x: operator.x - 1, y: operator.y })
+                    }
+                } else {
+                    contiguous_left = false
+                }
+
+    
+                // Check right
+                if (operator.x + 1 < this._width && (this.getPixel565(operator.x + 1, operator.y) == base_color)) {
+                    if (!contiguous_right) {
+                        stack.push({ x: operator.x + 1, y: operator.y })
+                        contiguous_right = true
+                    }
+                } else {
+                    contiguous_right = false
+                }
+
+                operator.y++
+                contiguous_down = (this.getPixel565(operator.x, operator.y) == base_color);
+            }
+        }
+    }
 }
 
 module.exports = SuperPixelApp
