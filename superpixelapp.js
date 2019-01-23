@@ -575,12 +575,12 @@ class SuperPixelApp {
     }
 
     turtleRight(degrees) {
-        this.turtleRotate(degrees);
+        this.turtleRotate(-degrees);
         return this;
     }
 
     turtleLeft(degrees) {
-        this.turtleRotate(-degrees);
+        this.turtleRotate(degrees);
         return this;
     }
 
@@ -599,6 +599,9 @@ class SuperPixelApp {
         this._turtle_x += Math.cos(SuperPixelApp.radians(this._turtle_angle)) * distance;
         this._turtle_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle)) * distance;
 
+        this._turtle_x = Math.round(this._turtle_x);
+        this._turtle_y = Math.round(this._turtle_y)
+
         if (this._turtle_drawing) {
             this.line(start_x, start_y, this._turtle_x, this._turtle_y, this._turtle_color);
         }
@@ -611,14 +614,15 @@ class SuperPixelApp {
         let p0_x = this._turtle_x;
         let p0_y = this._turtle_y;
 
-        let p1_x = p0_x += Math.cos(SuperPixelApp.radians(this._turtle_angle + 150)) * distance;
-        let p1_y = p0_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle + 150)) * distance;
+        let p1_x = p0_x + Math.cos(SuperPixelApp.radians(this._turtle_angle)) * distance;
+        let p1_y = p0_y - Math.sin(SuperPixelApp.radians(this._turtle_angle)) * distance;
 
-        let p2_x = p0_x += Math.cos(SuperPixelApp.radians(this._turtle_angle + 360 - 150)) * distance;
-        let p2_y = p0_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle + 360 - 150)) * distance;
+        p1_x = Math.round(p1_x);
+        p1_y = Math.round(p1_y);
 
         this.line(p0_x, p0_y, p1_x, p1_y, this._turtle_color);
-        this.line(p0_x, p0_y, p2_x, p2_y, this._turtle_color);
+        this.setPixel565(p0_x, p0_y, SuperPixelApp.rgbTo565(200,0,0));
+        this.setPixel565(p1_x, p1_y, SuperPixelApp.rgbTo565(0,200,0));
 
         return this;
     }
