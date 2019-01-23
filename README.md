@@ -9,6 +9,11 @@ Currently supports the following drawing primitives
 - Ellipse
 - Flood Fill
 - Text
+- Turtle Graphics
+
+# Linux Setup
+Check
+
 
 # References
 - Kano Pixel Kit communication was based on [murilopolese work](https://github.com/murilopolese/kano-kits/tree/nodejs)

@@ -12,6 +12,7 @@ class SuperPixelApp {
         this._frame = 0;
         this._framebuffer = new Buffer(this._width * this._height * 2, 0);
         this._setupText();
+        this.turtleReset();
 
         if ("delay" in options) {
             this._delay = options["delay"];
@@ -59,6 +60,10 @@ class SuperPixelApp {
         rgb = (rgb << 8) + b;
         return rgb;
     }
+
+    static radians(degrees) {
+        return 2 * Math.PI * (degrees / 360);
+    };
 
     elapsed() {
         return SuperPixelApp.time() - this._start_timestamp;
@@ -541,6 +546,87 @@ class SuperPixelApp {
             x += this.char(message.charAt(i), x, y, rgb565) + 2;
         }
     }
+
+    //
+    // Turtle Graphics
+    //
+    turtleReset() {
+        this.turtleSet(this._width / 2, this._height / 2, 90);
+        this.turtlePen(true);
+        this.turtleColor565(SuperPixelApp.rgbTo565(255, 255, 255));
+        return this;
+    }
+
+    turtleColor565(rgb565) {
+        this._turtle_color = rgb565;
+        return this;
+    }
+
+    turtlePen(down) {
+        this._turtle_drawing = down;
+        return this;
+    }
+
+    turtleSet(x, y, degrees) {
+        this._turtle_x = x;
+        this._turtle_y = y;
+        this._turtle_angle = degrees;
+        return this;
+    }
+
+    turtleRight(degrees) {
+        this.turtleRotate(degrees);
+        return this;
+    }
+
+    turtleLeft(degrees) {
+        this.turtleRotate(-degrees);
+        return this;
+    }
+
+    turtleRotate(degress) {
+        while (degress < 0) {
+            degress += 360;
+        }
+        this._turtle_angle = (this._turtle_angle + degress) % 360;
+        return this;
+    }
+
+    turtleForward(distance) {
+        let start_x = this._turtle_x;
+        let start_y = this._turtle_y;
+        
+        this._turtle_x += Math.cos(SuperPixelApp.radians(this._turtle_angle)) * distance;
+        this._turtle_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle)) * distance;
+
+        if (this._turtle_drawing) {
+            this.line(start_x, start_y, this._turtle_x, this._turtle_y, this._turtle_color);
+        }
+
+        return this;
+    }
+
+    turtleStamp() {
+        let distance = 2;
+        let p0_x = this._turtle_x;
+        let p0_y = this._turtle_y;
+
+        let p1_x = p0_x += Math.cos(SuperPixelApp.radians(this._turtle_angle + 150)) * distance;
+        let p1_y = p0_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle + 150)) * distance;
+
+        let p2_x = p0_x += Math.cos(SuperPixelApp.radians(this._turtle_angle + 360 - 150)) * distance;
+        let p2_y = p0_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle + 360 - 150)) * distance;
+
+        this.line(p0_x, p0_y, p1_x, p1_y, this._turtle_color);
+        this.line(p0_x, p0_y, p2_x, p2_y, this._turtle_color);
+
+        return this;
+    }
+
+
+
+
+
 }
 
 module.exports = SuperPixelApp
