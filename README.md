@@ -19,7 +19,7 @@ git checkout git@github.com:RuiVarela/superpixelkit.git
 cd superpixelkit
 npm install
 ```
-PixelKit has an internal RPC code that allows you to issue the same commands on usb or wifi,   
+Pixel Kit has an internal RPC code that allows you to issue the same commands on usb or wifi,   
 but before you can use wifi, you need to setup it's credentials
 
 You can connect to your device via usb and you should be able to setup your wifi credentials,  
