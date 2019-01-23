@@ -30,7 +30,7 @@ chmod a+rw /dev/ttyUSB0
 node index.js list-devices
 node index.js device-wifi /dev/ttyUSB0 HomeSweetHome WIFI_PASSWORD
 ```
-The last command should get you the device ip
+The last command should get you the device ip   
 You can now setup the device name and run an app via command line
 
 ```
