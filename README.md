@@ -11,6 +11,8 @@ Currently supports the following drawing primitives
 - Text
 - Turtle Graphics
 
+Before going any further note that there are a couple of command shortcuts for npm, check the `package.json` scripts section.
+
 ## Linux Setup
 Checkout code and install dependencies
 
@@ -72,6 +74,20 @@ And now you can run it by issuing
 ```
 node index.js device-app 192.168.1.90 Hello
 ```
+
+## Web Deploy
+Super Pixel Kit apps can run from a webpage, this web page is located on the `public` folder.  
+
+Make sure to have browserify
+```
+npm install -g browserify
+```
+
+Rebuild the js for the web runner
+```
+browserify -i serialport -i readline index.web.js -o public/index.js
+```
+now you should be able to test the build launching the `public\index.html`
 
 ## References
 - Kano Pixel Kit communication was based on [murilopolese work](https://github.com/murilopolese/kano-kits/tree/nodejs)

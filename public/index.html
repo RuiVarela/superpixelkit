@@ -72,41 +72,9 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
     crossorigin="anonymous"></script>
 
+    <script src="index.js"/>
   <script>
-    $(function () {
-      let form = $("#post_form");
-      form.submit(function (event) {
-        form.addClass('was-validated');
 
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (form[0].checkValidity()) {
-          onApply($("#ip").val(), $("#app").val());
-        }
-      });
-
-      $("#app").change(function () {
-        if (form[0].checkValidity()) {
-          onApply($("#ip").val(), $("#app").val());
-        }
-      });
-
-      let apps = [
-        "one",
-        "two",
-        "thredd"
-      ];
-
-      apps.forEach(function (element) {
-        $('#app').append($('<option>', { value: element, text: element }));
-      });
-    });
-
-    function onApply(ip, app) {
-      console.log('onApply ip=[' + ip + '] app=[' + app + ']');
-      return false;
-    }
   </script>
 </body>
 
