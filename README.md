@@ -87,7 +87,8 @@ Rebuild the js for the web runner
 ```
 browserify -i serialport -i readline -g uglifyify index.web.js -o public/index.js
 ```
-now you should be able to test the build launching the `public\index.html`
+now you should be able to test the build launching the `public\index.html`  
+A demo version is available [here](http://superpixelkit.demanda.pt/)
 
 ## References
 - Kano Pixel Kit communication was based on [murilopolese work](https://github.com/murilopolese/kano-kits/tree/nodejs)
