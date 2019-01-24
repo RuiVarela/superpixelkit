@@ -30,7 +30,6 @@
     "isomorphic-ws": "^4.0.1",
     "serialport": "^6.2.2",
     "uglifyify": "^5.0.1",
-    "uuid": "^3.3.2",
     "ws": "^6.0.0"
   }
 }

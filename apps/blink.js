@@ -2,12 +2,11 @@ const SuperPixelApp = require('../superpixelapp');
 
 class Blink extends SuperPixelApp {
     constructor() {
-        super({ name: "Blink", delay: 1000 });
+        super({ name: "Blink", delay: 500 });
     }
 
     step() {
 
-        this.clear(0);
         if (this._frame % 2 == 0) {
             let color = SuperPixelApp.rgbTo565(0, 255, 0);
             this.clear565(color);

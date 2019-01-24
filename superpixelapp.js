@@ -78,7 +78,6 @@ class SuperPixelApp {
     }
 
     start(kit) {
-        this._needs_device_update = true;
         this._frame = 0;
         this._start_timestamp = SuperPixelApp.time();
         this._kit = kit;
@@ -123,34 +122,33 @@ class SuperPixelApp {
 
     render() {
         this.step();
-        if (this._frame < 2) {
-            this.clear(0);
-        }
 
-        let needs_lightboard_int = true;
+        let setup = !this._render_setup_ts || (this._render_setup_ts < SuperPixelApp.time());
 
         Promise.resolve()
-            .then(() => {
-                if (this._needs_device_update) {
+            // .then(() => {
+            //     if (setup) {
 
-                    return new Promise((resolve, reject) => {
-                        this._kit.requestDeviceUpdate()
-                        .then(
-                            () => { resolve(); }, 
-                            () => { resolve();}) 
-                    });
-                }
+            //         return new Promise((resolve, reject) => {
+            //             this._kit.requestDeviceUpdate()
+            //                 .then(
+            //                     () => { resolve(); },
+            //                     () => { resolve(); })
+            //         });
+            //     }
 
-                return Promise.resolve();
-            })
+            //     return Promise.resolve();
+            // })
             .then(() => {
-                this._needs_device_update = false;
-                if (needs_lightboard_int) {
+                if (setup) {
+                    //console.log(SuperPixelApp.time());
+                    this._render_setup_ts = SuperPixelApp.time() + 1000;
                     return this._kit.lightboardInit();
                 }
                 return Promise.resolve();
             })
             .then(() => {
+                this._render_setup = false;
                 return this._kit.lightboardOn(this._framebuffer);
             })
             .catch((error) => {
@@ -571,9 +569,15 @@ class SuperPixelApp {
         return max_x;
     }
 
-    text(message, x, y, rgb565) {
+    text(message, x, y, rgb565, fixed) {
         for (var i = 0; i < message.length; i++) {
-            x += this.char(message.charAt(i), x, y, rgb565) + 2;
+            
+            if (fixed) {
+                this.char(message.charAt(i), x, y, rgb565);
+                x += this._char_width;;
+            } else {
+                x += this.char(message.charAt(i), x, y, rgb565) + 2;
+            }
         }
     }
 
@@ -656,10 +660,6 @@ class SuperPixelApp {
 
         return this;
     }
-
-
-
-
 
 }
 

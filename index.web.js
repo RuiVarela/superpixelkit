@@ -28,8 +28,28 @@ $(function () {
     });
 });
 
+let kit = null;
+let last_ip = null;
 function onApply(ip, app) {
     console.log('onApply ip=[' + ip + '] app=[' + app + ']');
+    
+    if (ip != last_ip) {
+        kit = new SuperPixel({ ip });
+        kit.connect()
+        .then((device) => {
+            console.log(`Connected to ${kit.location()}`);
+            console.log("Apps: " + JSON.stringify(SuperPixelApp.list()));
+            SuperPixelApp.activate(kit, app);
+            last_ip = ip;
+        })
+        .catch(error => {
+            kit = null;
+            console.log("failed with error: " + error);
+            kit.disconnect();
+        }); 
+    } else {
+        SuperPixelApp.activate(kit, app);  
+    }
     return false;
 }
 

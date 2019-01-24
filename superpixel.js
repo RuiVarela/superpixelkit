@@ -4,7 +4,7 @@
 const SerialPort = require('serialport');
 const WebSocket = require('isomorphic-ws')
 const CreateInterface = require('readline').createInterface;
-const uuid = require('uuid');
+
 class SuperPixel {
 
     constructor(options) {
@@ -12,7 +12,7 @@ class SuperPixel {
             throw new Error('Path or ip address are required');
         }
 
-        this.id_counter = 10;
+        this.id_counter = 1;
         this.requests = {};
         this.hander = null;
 
@@ -95,8 +95,8 @@ class SuperPixel {
         } else if (this.ip) {
             return new Promise((resolve, reject) => {
                 this.ws = new WebSocket(`ws://${this.ip}:9998`);
-                this.ws.onmessage = (d) => { 
-                    this.handleData(d.data); 
+                this.ws.onmessage = (d) => {
+                    this.handleData(d.data);
                 };
                 this.ws.onerror = (err) => { reject(err); };
                 this.ws.onopen = () => {
@@ -140,9 +140,11 @@ class SuperPixel {
      * @return {Object}
      */
     getRPCRequestObject(method, params) {
+        let id = this.id_counter++;
+
         return {
             type: "rpc-request",
-            id: uuid.v4(),
+            id: id.toString(),
             method: method,
             params: params
         }
@@ -158,10 +160,13 @@ class SuperPixel {
     rpcPromise(request) {
         let promise = new Promise((resolve, reject) => {
             this.requests[request.id] = { resolve, reject, request };
+            let string = JSON.stringify(request);
+            //console.log(string);
+
             if (this.port) {
-                this.port.write(Buffer.from(JSON.stringify(request) + '\r\n'));
+                this.port.write(Buffer.from(string + '\r\n'));
             } else if (this.ws) {
-                this.ws.send(Buffer.from(JSON.stringify(request) + '\r\n'))
+                this.ws.send(string)
             }
         });
         return promise;

@@ -9,3 +9,4 @@ require('./apps/ellipses');
 require('./apps/fill');
 require('./apps/text');
 require('./apps/turtle');
+require('./apps/time');
