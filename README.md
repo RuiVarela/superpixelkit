@@ -85,7 +85,7 @@ npm install -g browserify
 
 Rebuild the js for the web runner
 ```
-browserify -i serialport -i readline index.web.js -o public/index.js
+browserify -i serialport -i readline -g uglifyify index.web.js -o public/index.js
 ```
 now you should be able to test the build launching the `public\index.html`
 

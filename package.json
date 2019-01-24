@@ -9,7 +9,8 @@
     "device-info": "node index.js device-info 192.168.1.90",
     "device-name": "node index.js device-name 192.168.1.90 Pixy",
     "device-app": "node index.js device-app 192.168.1.90 Blink",
-    "bundle-web": "browserify -i serialport -i readline index.web.js -o public/index.js"
+    "bundle-web": "browserify -i serialport -i readline index.web.js -o public/index.js",
+    "bundle-web-ugly": "browserify -i serialport -i readline -g uglifyify index.web.js -o public/index.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   "dependencies": {
     "isomorphic-ws": "^4.0.1",
     "serialport": "^6.2.2",
+    "uglifyify": "^5.0.1",
     "uuid": "^3.3.2",
     "ws": "^6.0.0"
   }
