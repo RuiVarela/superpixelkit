@@ -78,6 +78,7 @@ class SuperPixelApp {
     }
 
     start(kit) {
+        this._needs_device_update = true;
         this._frame = 0;
         this._start_timestamp = SuperPixelApp.time();
         this._kit = kit;
@@ -115,16 +116,45 @@ class SuperPixelApp {
         this._framebuffer.writeUInt16BE(rgb565, offset * 2);
     }
 
-    getPixel565(x, y, rgb565) {
+    getPixel565(x, y) {
         let offset = y * this._width + x;
         return this._framebuffer.readUInt16BE(offset * 2);
     }
 
     render() {
         this.step();
-        this._kit.sendFrameBuffer(this._framebuffer)
+        if (this._frame < 2) {
+            this.clear(0);
+        }
+
+        let needs_lightboard_int = true;
+
+        Promise.resolve()
+            .then(() => {
+                if (this._needs_device_update) {
+
+                    return new Promise((resolve, reject) => {
+                        this._kit.requestDeviceUpdate()
+                        .then(
+                            () => { resolve(); }, 
+                            () => { resolve();}) 
+                    });
+                }
+
+                return Promise.resolve();
+            })
+            .then(() => {
+                this._needs_device_update = false;
+                if (needs_lightboard_int) {
+                    return this._kit.lightboardInit();
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                return this._kit.lightboardOn(this._framebuffer);
+            })
             .catch((error) => {
-                console.log('sendFrameBuffer error', error.message);
+                console.log('render error', error.message);
             });
     }
 
@@ -595,7 +625,7 @@ class SuperPixelApp {
     turtleForward(distance) {
         let start_x = this._turtle_x;
         let start_y = this._turtle_y;
-        
+
         this._turtle_x += Math.cos(SuperPixelApp.radians(this._turtle_angle)) * distance;
         this._turtle_y -= Math.sin(SuperPixelApp.radians(this._turtle_angle)) * distance;
 
@@ -621,8 +651,8 @@ class SuperPixelApp {
         p1_y = Math.round(p1_y);
 
         this.line(p0_x, p0_y, p1_x, p1_y, this._turtle_color);
-        this.setPixel565(p0_x, p0_y, SuperPixelApp.rgbTo565(200,0,0));
-        this.setPixel565(p1_x, p1_y, SuperPixelApp.rgbTo565(0,200,0));
+        this.setPixel565(p0_x, p0_y, SuperPixelApp.rgbTo565(200, 0, 0));
+        this.setPixel565(p1_x, p1_y, SuperPixelApp.rgbTo565(0, 200, 0));
 
         return this;
     }

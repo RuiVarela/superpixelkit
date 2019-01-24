@@ -2,10 +2,9 @@
 // via usb I needed to: sudo chmod a+rw /dev/ttyUSB0 
 
 const SerialPort = require('serialport');
-const WebSocket = require('ws');
+const WebSocket = require('isomorphic-ws')
 const CreateInterface = require('readline').createInterface;
 const uuid = require('uuid');
-
 class SuperPixel {
 
     constructor(options) {
@@ -13,6 +12,7 @@ class SuperPixel {
             throw new Error('Path or ip address are required');
         }
 
+        this.id_counter = 10;
         this.requests = {};
         this.hander = null;
 
@@ -95,14 +95,14 @@ class SuperPixel {
         } else if (this.ip) {
             return new Promise((resolve, reject) => {
                 this.ws = new WebSocket(`ws://${this.ip}:9998`);
-                this.ws.on('open', (err) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    this.ws.on('message', (d) => this.handleData(d));
+                this.ws.onmessage = (d) => { 
+                    this.handleData(d.data); 
+                };
+                this.ws.onerror = (err) => { reject(err); };
+                this.ws.onopen = () => {
+                    this.ws.onerror = (err) => { console.log('WS ' + err); };
                     resolve(this);
-                });
+                };
             });
 
         } else {
@@ -312,11 +312,18 @@ class SuperPixel {
         return promise;
     }
 
-    sendFrameBuffer(buffer) {
+    lightboardOn(buffer) {
         return this.rpcRequest('lightboard:on', [{ map: buffer.toString('base64') }]);
     }
 
-    // disableOTGControl() {}
+    lightboardInit() {
+        return this.rpcRequest('lightboard:init', [null]);
+    }
+
+    requestDeviceUpdate() {
+        return this.rpcRequest('request-device-update', [null]);
+    }
+
     getAnimationConfig(modeId) {
         return this.rpcRequest('get-anim-config', [{ modeId: modeId }]);
     }
